@@ -8,44 +8,54 @@ const htmlParser = require("htmlparser2");
  * @param id 文件名
  */
 function parse(html, id) {
-    var source = {
-        filename: id
-    };
     var root = new index_1.RootNode();
-    root.source = source;
+    root.source = {
+        filename: id,
+        startIndex: 0,
+        endIndex: html.length
+    };
     var stacks = [root];
     var con = stacks[0];
     var parser = new htmlParser.Parser({
         onopentag(name, attrs) {
             var node = new index_1.ElementNode(name, attrs);
-            node.source = source;
+            node.source = getSource();
             stacks.push(node);
             con.appendChild(node);
             con = node;
         },
         onclosetag(name) {
+            // @ts-ignore
+            con.source.endIndex = parser.endIndex + 1;
             stacks.pop();
             con = stacks[stacks.length - 1];
         },
         ontext(text) {
             var node = new index_1.TextNode(text);
-            node.source = source;
+            node.source = getSource();
             con.appendChild(node);
         },
         oncomment(data) {
             var node = new index_1.CommentNode(data);
-            node.source = source;
+            node.source = getSource();
             con.appendChild(node);
         },
         onprocessinginstruction(name, data) {
             var node = new index_1.DoctypeNode(data);
-            node.source = source;
+            node.source = getSource();
             con.appendChild(node);
         }
     }, {
         decodeEntities: true,
         recognizeSelfClosing: true,
         lowerCaseTags: true
+    });
+    var getSource = () => ({
+        filename: id,
+        // @ts-ignore
+        startIndex: parser.startIndex,
+        // @ts-ignore
+        endIndex: parser.startIndex
     });
     parser.write(html);
     parser.end();

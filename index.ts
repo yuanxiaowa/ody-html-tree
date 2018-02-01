@@ -17,6 +17,8 @@ export abstract class Node {
   abstract get textContent(): string
   source: {
     filename: string
+    startIndex: number
+    endIndex: number
   }
   constructor(public nodeType: NodeType) { }
   isElement(): this is ElementNode {
