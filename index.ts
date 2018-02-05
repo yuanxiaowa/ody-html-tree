@@ -285,7 +285,7 @@ export class ElementNode extends Node {
   getElementsByTagName(name: string): ElementNode[] {
     var rets = this.children.map(node => {
       var ret: ElementNode[] = node.getElementsByTagName(name);
-      if (node.isElement()) {
+      if (node.name === name) {
         ret.unshift(node);
       }
       return ret;
